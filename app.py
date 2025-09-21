@@ -262,7 +262,8 @@ def create_heatmap(gdf):
         center={"lat": 40.4168, "lon": -3.7038},  # Madrid center
         opacity=0.7,
         title="Mapa de accesibilidad de municipios. Haz clic en un municipio para ver más detalles",
-        custom_data=[gdf_plot['NAMEUNIT'], gdf_plot['population'], gdf_plot['rent'], gdf_plot['maxtemp']]
+        custom_data=[gdf_plot['NAMEUNIT'], gdf_plot['population'], gdf_plot['rent'], gdf_plot['maxtemp']],
+        labels={'weighted_score': 'Score'}
     )
     
     # Update hover template with correct data access
