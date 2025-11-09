@@ -195,6 +195,13 @@ def load_placeholder_images():
 
 def calculate_weighted_score(row, weights, filters):
     """Calculate weighted score for a municipality based on user preferences"""
+
+    # ----
+    # [TASK2] Accesibility aggregation
+    # [TASK3] AHP algorithm
+    # [TASK4] Final rankings
+    # ----
+
     concepts = ['schools', 'pharmacies', 'hospitals', 'parks', 'cinemas', 'restaurants', 'supermarkets']
     
     # Check filters first
@@ -217,6 +224,12 @@ def calculate_weighted_score(row, weights, filters):
         normalized_score = np.mean([row[concept] for concept in concepts])
     
     return round(normalized_score, 1)
+
+    # ----
+    # END [TASK2] Accesibility aggregation
+    # END [TASK3] AHP algorithm
+    # END [TASK4] Final rankings
+    # ----
 
 def filter_by_criteria(df, population_range, rent_range, temp_range):
     """Filter municipalities by additional criteria"""
@@ -321,7 +334,11 @@ def main():
     # Load data
     df, gdf = load_data()
     images = load_placeholder_images()
-    
+
+    # ----
+    # [TASK1] User questionnare
+    # ----
+
     # Sidebar for user preferences
     st.sidebar.header("Preferencias")
     
@@ -387,6 +404,10 @@ def main():
         value=(int(df['maxtemp'].min()), int(df['maxtemp'].max())),
         step=1
     )
+
+    # ----
+    # END [TASK1] User questionnare
+    # ----
     
     # Filter data based on criteria
     filtered_df = filter_by_criteria(df, population_range, rent_range, temp_range)
