@@ -48,20 +48,24 @@ CSS_STYLES = """
     opacity: 0.8;
 }
 
-/* Municipality cards - theme aware */
-.municipality-card {
-    background: var(--background-color);
-    padding: 1.5rem;
-    border-radius: 18px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    margin: 1rem 0;
-    border-left: 5px solid var(--color-primary);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.municipality-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-}
+
+# /* Municipality cards - theme aware */
+# .municipality-card {
+#     background: linear-gradient(135deg, #568EE2 0%, #6FB5BA 100%);
+#     padding: 0.06rem;
+#     border-radius: 2px;
+#     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+#     margin: 0.5rem 0;
+#     border-left: 3px solid #3D517B;
+#     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+#     min-height: 2px;
+#     max-height: 3px;
+# }
+# .municipality-card:hover {
+#     transform: translateY(-2px);
+#     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+# }
+
 
 .score-badge {
     background: linear-gradient(90deg, var(--color-primary), var(--color-teal));

@@ -33,10 +33,9 @@ def show_single_municipality_details(
 
         img = get_municipality_image(muni["Nombre"])
         if img:
-            st.image(img, caption=muni["Nombre"], width=150)
+            st.image(img)
 
     with col2:
-        st.markdown(f"**{muni['Nombre']}**")
         st.markdown(
             f'<div class="score-badge">Puntuación: {muni["weighted_score"]:.1f}</div>',
             unsafe_allow_html=True,
