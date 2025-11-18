@@ -16,6 +16,7 @@ from ui.questionnaire import render_questionnaire
 from ui.map_view import render_map_view
 from ui.list_view import render_list_view
 from ui.details_view import render_details
+from ui.comparison_view import render_comparison_view
 from ui.sensitivity import render_sensitivity
 
 
@@ -36,6 +37,10 @@ def main() -> None:
         for key in ["comparison_municipality", "comparison_selector_in_panel", "clear_comparison_only"]:
             st.session_state.pop(key, None)
     
+    # Clear selected municipality when switching views
+    if "previous_view" not in st.session_state:
+        st.session_state["previous_view"] = "🗺️ Mapa de municipios"
+
     # Header
     st.markdown('<h1 class="main-header">🏘️ Living on the Edge</h1>', unsafe_allow_html=True)
     st.markdown(
@@ -108,19 +113,20 @@ def main() -> None:
             how="inner",
         )
     
-    # Show municipality details if selected
-    if "selected_municipality" in st.session_state:
-        st.markdown("---")
-        render_details(st.session_state["selected_municipality"], images, scores_df)
-    
     # Main view selector
     view_option = st.radio(
         "Selecciona vista:",
-        ["🗺️ Mapa de municipios", "📋 Lista de municipios"],
+        ["🗺️ Mapa de municipios", "📋 Lista de municipios", "⚖️ Comparación"],
         horizontal=True,
         key="view_selector",
     )
-    
+
+    # Clear selected municipality when view changes
+    if st.session_state["previous_view"] != view_option:
+        st.session_state.pop("selected_municipality", None)
+        st.session_state.pop("details_origin", None)
+        st.session_state["previous_view"] = view_option    
+
     # CSV download
     st.download_button(
         label="📥 Descargar resultados (CSV)",
@@ -133,8 +139,11 @@ def main() -> None:
     # Render selected view
     if view_option == "🗺️ Mapa de municipios":
         render_map_view(gdf, scores_df)
-    else:
+    elif view_option == "📋 Lista de municipios":
         render_list_view(scores_df, images)
+    else:
+        render_comparison_view(scores_df, images)
+    
     
     # Sensitivity analysis
     render_sensitivity(scores_df, weights, norm_df, compute_scores)

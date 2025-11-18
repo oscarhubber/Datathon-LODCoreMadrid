@@ -46,7 +46,7 @@ def create_heatmap(gdf: gpd.GeoDataFrame):
     )
     return fig
 
-
+# New function:
 def render_map_view(gdf: gpd.GeoDataFrame, scores_df: pd.DataFrame) -> None:
     """Render map view with click handling.
     
@@ -58,14 +58,21 @@ def render_map_view(gdf: gpd.GeoDataFrame, scores_df: pd.DataFrame) -> None:
         st.warning("No hay municipios disponibles para mostrar.")
         return
 
-    st.markdown("**Consejo:** haz clic en un municipio del mapa para ver más detalles abajo 👇")
+    # Check if in comparison mode
+    in_comparison_mode = st.session_state.get("view_selector") == "⚖️ Comparación"
+    
+    if in_comparison_mode:
+        st.markdown("**Consejo:** haz clic en un municipio del mapa para añadirlo a la comparación 👇")
+    else:
+        st.markdown("**Consejo:** haz clic en un municipio del mapa para ver más detalles abajo 👇")
+    
     suppress = st.session_state.pop("suppress_map_selection", False)
 
     fig = create_heatmap(gdf)
     event = st.plotly_chart(
         fig,
         key="heatmap",
-        use_container_width=True,
+        width='stretch',
         on_select="rerun",
         selection_mode="points",
     )
@@ -75,6 +82,32 @@ def render_map_view(gdf: gpd.GeoDataFrame, scores_df: pd.DataFrame) -> None:
         clicked_name = gdf.iloc[idx]["Nombre"]
         selected_row = scores_df[scores_df["Nombre"] == clicked_name].iloc[0]
 
-        st.session_state["selected_municipality"] = selected_row
-        st.session_state["details_origin"] = "map"
-        st.session_state["switch_view_to"] = "🗺️ Mapa de municipios"
+        if in_comparison_mode:
+            # Add to comparison list
+            if "comparison_municipalities" not in st.session_state:
+                st.session_state["comparison_municipalities"] = []
+            
+            comparison_list = st.session_state["comparison_municipalities"]
+            
+            if selected_row["codigo"] not in comparison_list and len(comparison_list) < 4:
+                comparison_list.append(selected_row["codigo"])
+                st.session_state["comparison_municipalities"] = comparison_list
+                st.rerun()
+            elif selected_row["codigo"] in comparison_list:
+                st.info(f"✓ {clicked_name} ya está en la comparación")
+            else:
+                st.warning("⚠️ Máximo 4 municipios en comparación. Elimina uno para añadir otro.")
+        else:
+            # Show details inline
+            st.session_state["selected_municipality"] = selected_row
+            st.session_state["details_origin"] = "map"
+    
+    # Show details inline in map view
+    if "selected_municipality" in st.session_state and st.session_state.get("details_origin") == "map":
+        st.markdown("---")
+        from ui.details_view import render_details
+        from core.data_loader import load_placeholder_images
+        images = load_placeholder_images()
+        render_details(st.session_state["selected_municipality"], images, scores_df)
+
+
