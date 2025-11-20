@@ -17,7 +17,6 @@ from ui.map_view import render_map_view
 from ui.list_view import render_list_view
 from ui.details_view import render_details
 from ui.comparison_view import render_comparison_view
-from ui.sensitivity import render_sensitivity
 
 
 def main() -> None:
@@ -34,7 +33,7 @@ def main() -> None:
         st.session_state["switch_view_to"] = None
     
     if st.session_state.get("clear_comparison_only"):
-        for key in ["comparison_municipality", "comparison_selector_in_panel", "clear_comparison_only"]:
+        for key in ["comparison_municipality_code", "comparison_selector_in_panel", "clear_comparison_only"]:
             st.session_state.pop(key, None)
     
     # Clear selected municipality when switching views
@@ -68,6 +67,7 @@ def main() -> None:
     acc_df = compute_accessibility_hours(
         df=df,
         freq_car=prefs["w_car"],
+        freq_supermarket=prefs["w_supermarket"],
         freq_sport=prefs["w_sport"],
         freq_hospital=prefs["w_hospital"],
         edu_has_kids=prefs["edu_has_kids"],
@@ -75,7 +75,9 @@ def main() -> None:
         edu_levels=prefs["edu_levels"],
     )
     
-    df_scored = df.merge(acc_df[["codigo", "AccessibilityHoursWeekly"]], on="codigo", how="left")
+    # Merge accessibility data including breakdown columns (exclude 'Nombre' to avoid duplicates)
+    acc_cols = ["codigo", "AccessibilityHoursWeekly"] + [col for col in acc_df.columns if col.startswith("hrs_")]
+    df_scored = df.merge(acc_df[acc_cols], on="codigo", how="left")
     
     # Normalize criteria
     norm_df = normalize_criteria(df_scored, BENEFIT_COLUMNS, COST_COLUMNS)
@@ -101,7 +103,7 @@ def main() -> None:
         gdf = gdf_raw.merge(
             scores_df[["codigo", "Nombre", "Score", "weighted_score", "AccessibilityHoursWeekly",
                       "IDE_PoblacionTotal", "IDE_PrecioPorMetroCuadrado"] +
-                     [c for c in scores_df.columns if c.startswith("NORM_") or c.startswith("CONTRIB_")]],
+                     [c for c in scores_df.columns if c.startswith("NORM_") or c.startswith("CONTRIB_") or c.startswith("hrs_")]],
             on=["Nombre"],
             how="inner",
         )
@@ -118,7 +120,7 @@ def main() -> None:
 
     # Clear selected municipality when view changes
     if st.session_state["previous_view"] != view_option:
-        st.session_state.pop("selected_municipality", None)
+        st.session_state.pop("selected_municipality_code", None)
         st.session_state.pop("details_origin", None)
         st.session_state["previous_view"] = view_option    
 
@@ -139,11 +141,6 @@ def main() -> None:
     else:
         render_comparison_view(scores_df, images)
     
-
-    # Sensitivity analysis
-    st.markdown('<hr style="margin: -0.25rem 0; border: none; border-top: 1px solid #ddd;">', unsafe_allow_html=True)
-    render_sensitivity(scores_df, weights, norm_df, compute_scores)
-
     # Back to top button
     st.markdown(
         '<a href="#top" class="back-to-top" title="Volver arriba">:material/keyboard_arrow_up:</a>',
