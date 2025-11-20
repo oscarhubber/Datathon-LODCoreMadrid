@@ -119,54 +119,6 @@ def show_single_municipality_details(
             '</div>',
             unsafe_allow_html=True
         )
-        
-        # Drilldown buttons (smaller and constrained)
-        st.markdown('<div style="max-width: 50%; font-size: 0.8rem;">', unsafe_allow_html=True)
-        col_h, col_m = st.columns(2)
-        with col_h:
-            if st.button(":material/man: Hombres", key=f"drill_h_{muni['codigo']}", use_container_width=True):
-                st.session_state[f"gender_drill_{muni['codigo']}"] = "Hombres"
-                st.rerun()
-        with col_m:
-            if st.button(":material/woman: Mujeres", key=f"drill_m_{muni['codigo']}", use_container_width=True):
-                st.session_state[f"gender_drill_{muni['codigo']}"] = "Mujeres"
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Show drilldown
-        drill_key = f"gender_drill_{muni['codigo']}"
-        if drill_key in st.session_state:
-            selected_gender = st.session_state[drill_key]
-            gender_key = "Hombres" if selected_gender == "Hombres" else "Mujeres"
-            
-            # Calculate age distribution for selected gender (4 groups)
-            age_counts = {
-                "0-19": int(muni[f"DEM_Edad_0_19_{gender_key}"]),
-                "20-39": int(muni[f"DEM_Edad_20_39_{gender_key}"]),
-                "40-59": int(muni[f"DEM_Edad_40_59_{gender_key}"]),
-                "60+": int(muni[f"DEM_Edad_60_79_{gender_key}"] + muni[f"DEM_Edad_80Plus_{gender_key}"])
-            }
-            total_gender = sum(age_counts.values())
-            
-            # Build drilldown bar
-            drilldown_html = '<div class="demographics-bar">'
-            for age, count in age_counts.items():
-                pct = (count / total_gender * 100) if total_gender > 0 else 0
-                colors = {"0-19": "#568EE2", "20-39": "#6FB5BA", "40-59": "#A59FD0", "60+": "#E8A05D"}
-                drilldown_html += f'<div style="background: {colors[age]}; width: {pct:.1f}%;" title="{count:,} personas">{pct:.1f}%</div>'
-            drilldown_html += '</div>'
-            
-            col_title, col_close = st.columns([20, 1])
-            with col_title:
-                st.markdown(f"##### **Desglose de {selected_gender} por edad:**")
-            with col_close:
-                if st.button(":material/close:", key=f"close_drill_{muni['codigo']}", help="Cerrar desglose"):
-                    st.session_state.pop(drill_key, None)
-                    st.rerun()
-
-            st.markdown(drilldown_html, unsafe_allow_html=True)
-
-
 
 
 
